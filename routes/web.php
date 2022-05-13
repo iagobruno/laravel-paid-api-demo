@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,3 +17,6 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/auth/github/redirect', [AuthController::class, 'redirect'])->name('auth.github');
+Route::get('/auth/github/callback', [AuthController::class, 'callback']);
