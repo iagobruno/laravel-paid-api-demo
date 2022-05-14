@@ -4,21 +4,21 @@ use \App\Models\User;
 
 uses(\Tests\TestCase::class);
 
-test('Deve somar o total ', function () {
+test('Deve somar o total corretamente para este mês', function () {
     $user = User::factory()->create();
 
-    $user->reportApiUsage();
-    $user->reportApiUsage(2);
+    $user->recordApiUsage();
+    $user->recordApiUsage(2);
 
-    $this->assertDatabaseCount('api_usage_reports', 1);
-    expect($user->apiUsageReports()->first()->total)->toEqual(3);
+    $this->assertDatabaseCount('api_usage_records', 1);
+    expect($user->apiUsageRecords()->first()->total)->toEqual(3);
 });
 
-test('Deve calcular corretamente o "starts_at" e o "ends_at" quando criar um ApiUsageReport', function () {
+test('Deve calcular corretamente o "starts_at" e o "ends_at" quando criar um ApiUsageRecord', function () {
     $user = User::factory()->create();
     $user->created_at = now()->subMonths(rand(1, 30))->subDays(rand(1, 30));
 
-    $usageReport = $user->reportApiUsage();
+    $usageReport = $user->recordApiUsage();
     // dump($usageReport->toArray());
 
     $monthsSinceUserCreation = $user->created_at->diffInMonths(now());

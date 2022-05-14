@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Laravel\Cashier\Billable;
+use \App\Models\ApiUsageRecord;
 
 class User extends Authenticatable
 {
@@ -46,33 +47,37 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function apiUsageReports()
+    public function apiUsageRecords()
     {
-        return $this->hasMany(\App\Models\ApiUsageReport::class);
+        return $this->hasMany(ApiUsageRecord::class);
     }
 
-    public function reportApiUsage($quantity = 1)
+    /**
+     * Records an API usage in the database for monthly quota limit checking.
+     * @return ApiUsageRecord API usage record in this month.
+     */
+    public function recordApiUsage($quantity = 1)
     {
         $user = $this;
-        $report = $user->apiUsageReports()
+        $recordOfThisMonth = $user->apiUsageRecords()
             ->where('starts_at', '<=', now())
             ->where('ends_at', '>=', now())
             ->first();
 
-        if ($report) {
-            $report->increment('total', $quantity);
+        if ($recordOfThisMonth) {
+            $recordOfThisMonth->increment('total', $quantity);
         } else {
             $monthsSinceAccountCreation = $user->created_at->diffInMonths(now());
-            $report = $user->apiUsageReports()->create([
+            $recordOfThisMonth = $user->apiUsageRecords()->create([
                 'total' => $quantity,
-                'starts_at' => $user->created_at->addMonth($monthsSinceAccountCreation),
-                'ends_at' => $user->created_at->addMonth($monthsSinceAccountCreation + 1),
+                'starts_at' => $user->created_at->addMonths($monthsSinceAccountCreation),
+                'ends_at' => $user->created_at->addMonths($monthsSinceAccountCreation + 1),
             ]);
         }
 
         // Send to Stripe too
         $user->subscription('default')?->reportUsage($quantity);
 
-        return $report;
+        return $recordOfThisMonth;
     }
 }

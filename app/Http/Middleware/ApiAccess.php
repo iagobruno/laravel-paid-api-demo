@@ -22,7 +22,7 @@ class ApiAccess
             /** @var \App\Models\User */
             $user = auth()->user();
             $isPremiumUser = $user->subscription() !== null;
-            $usageReport = $user->reportApiUsage();
+            $usageReport = $user->recordApiUsage();
             $freeRequestsQuotaExceeded = $usageReport->total > 10;
 
             if (!$isPremiumUser && $freeRequestsQuotaExceeded) {

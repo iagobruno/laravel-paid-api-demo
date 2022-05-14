@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('api_usage_reports', function (Blueprint $table) {
+        Schema::create('api_usage_records', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained();
             $table->integer('total');
@@ -30,6 +30,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('api_usage_reports');
+        Schema::dropIfExists('api_usage_records');
     }
 };
