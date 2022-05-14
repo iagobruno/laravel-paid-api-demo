@@ -51,33 +51,4 @@ class User extends Authenticatable
     {
         return $this->hasMany(ApiUsageRecord::class);
     }
-
-    /**
-     * Records an API usage in the database for monthly quota limit checking.
-     * @return ApiUsageRecord API usage record in this month.
-     */
-    public function recordApiUsage($quantity = 1)
-    {
-        $user = $this;
-        $recordOfThisMonth = $user->apiUsageRecords()
-            ->where('starts_at', '<=', now())
-            ->where('ends_at', '>=', now())
-            ->first();
-
-        if ($recordOfThisMonth) {
-            $recordOfThisMonth->increment('total', $quantity);
-        } else {
-            $monthsSinceAccountCreation = $user->created_at->diffInMonths(now());
-            $recordOfThisMonth = $user->apiUsageRecords()->create([
-                'total' => $quantity,
-                'starts_at' => $user->created_at->addMonths($monthsSinceAccountCreation),
-                'ends_at' => $user->created_at->addMonths($monthsSinceAccountCreation + 1),
-            ]);
-        }
-
-        // Send to Stripe too
-        $user->subscription('default')?->reportUsage($quantity);
-
-        return $recordOfThisMonth;
-    }
 }

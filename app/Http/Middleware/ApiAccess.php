@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use App\Models\ApiUsageRecord;
 
 class ApiAccess
 {
@@ -18,22 +19,36 @@ class ApiAccess
      */
     public function handle(Request $request, Closure $next)
     {
-        return DB::transaction(function () use ($next, $request) {
+        DB::beginTransaction();
+        try {
             /** @var \App\Models\User */
             $user = auth()->user();
             $isPremiumUser = $user->subscription() !== null;
-            $usageReport = $user->recordApiUsage();
+            $usageReport = ApiUsageRecord::recordUsage();
             $freeRequestsQuotaExceeded = $usageReport->total > 10;
 
             if (!$isPremiumUser && $freeRequestsQuotaExceeded) {
                 return abort(Response::HTTP_FORBIDDEN, 'You have exceeded your free request quota for this API.');
             }
-
             if ($isPremiumUser && !$user->subscription()->valid() && $freeRequestsQuotaExceeded) {
                 return abort(Response::HTTP_FORBIDDEN, 'There was a problem with your account subscription.');
             }
 
-            return $next($request);
-        });
+            $response = $next($request);
+            // "Re-throw" errors
+            if ($response->exception) {
+                DB::rollBack();
+                return $response;
+            }
+
+            // Report usage to Stripe
+            $user->subscription()?->reportUsage(1);
+
+            DB::commit();
+            return $response;
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            throw $e;
+        }
     }
 }

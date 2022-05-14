@@ -33,6 +33,34 @@ class ApiUsageRecord extends Model
     ];
 
     /**
+     * Records an API usage in the database for monthly quota limit checking.
+     * @return ApiUsageRecord API usage record in this month.
+     */
+    public static function recordUsage($quantity = 1)
+    {
+        /** @var \App\Models\User */
+        $user = auth()->user();
+        $recordOfThisMonth = $user->apiUsageRecords()
+            ->where('starts_at', '<=', now())
+            ->where('ends_at', '>=', now())
+            ->first();
+
+        if ($recordOfThisMonth) {
+            $recordOfThisMonth->increment('total', $quantity);
+        } else {
+            $monthsSinceAccountCreation = $user->created_at->diffInMonths(now());
+
+            $recordOfThisMonth = $user->apiUsageRecords()->create([
+                'total' => $quantity,
+                'starts_at' => $user->created_at->addMonths($monthsSinceAccountCreation),
+                'ends_at' => $user->created_at->addMonths($monthsSinceAccountCreation + 1),
+            ]);
+        }
+
+        return $recordOfThisMonth;
+    }
+
+    /**
      * Get the prunable model query.
      *
      * @return \Illuminate\Database\Eloquent\Builder
