@@ -14,6 +14,26 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
+
+    Route::get('/paid-route', function () {
+        /** @var \App\Models\User */
+        $user = auth()->user();
+        $isPremiumUser = $user->subscription() !== null;
+        $usageReport = $user->reportApiUsage();
+        $freeRequestsQuotaExceeded = $usageReport->total > 10;
+
+        if (!$isPremiumUser && $freeRequestsQuotaExceeded) {
+            return abort(Response::HTTP_FORBIDDEN, 'You have exceeded your free request quota for this API.');
+        }
+
+        if ($isPremiumUser && !$user->subscription()->valid() && $freeRequestsQuotaExceeded) {
+            return abort(Response::HTTP_FORBIDDEN, 'There was a problem with your account subscription.');
+        }
+
+        return 'WORKS!';
+    })->name('api.paid-route');
 });

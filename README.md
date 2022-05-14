@@ -60,7 +60,7 @@ sail artisan test
 Use the [Stripe CLI](https://stripe.com/docs/stripe-cli) to simulate Stripe events in your local environment. [Learn more about Webhooks](https://stripe.com/docs/webhooks).
 
 ```
-stripe listen --forward-to localhost/stripe_webhooks
+stripe listen --forward-to localhost/stripe/webhook
 ```
 
 ```

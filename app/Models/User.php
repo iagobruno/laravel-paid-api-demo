@@ -45,4 +45,34 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function apiUsageReports()
+    {
+        return $this->hasMany(\App\Models\ApiUsageReport::class);
+    }
+
+    public function reportApiUsage($quantity = 1)
+    {
+        $user = $this;
+        $report = $user->apiUsageReports()
+            ->where('starts_at', '<=', now())
+            ->where('ends_at', '>=', now())
+            ->first();
+
+        if ($report) {
+            $report->increment('total', $quantity);
+        } else {
+            $monthsSinceAccountCreation = $user->created_at->diffInMonths(now());
+            $report = $user->apiUsageReports()->create([
+                'total' => $quantity,
+                'starts_at' => $user->created_at->addMonth($monthsSinceAccountCreation),
+                'ends_at' => $user->created_at->addMonth($monthsSinceAccountCreation + 1),
+            ]);
+        }
+
+        // Send to Stripe too
+        $user->subscription('default')?->reportUsage($quantity);
+
+        return $report;
+    }
 }
