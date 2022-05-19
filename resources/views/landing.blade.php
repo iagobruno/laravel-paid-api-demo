@@ -50,7 +50,7 @@
                     </li>
                     <li>Suporte técnico.</li>
                 </ul>
-                <a href="{{ route('auth.github') }}" type="button" class="btn btn-lg btn-block btn-primary">Começar
+                <a href="{{ route('subscribe.show') }}" type="button" class="btn btn-lg btn-block btn-primary">Começar
                     agora</a>
             </div>
         </div>
