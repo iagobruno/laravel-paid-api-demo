@@ -1,6 +1,6 @@
 # laravel-paid-api-demo
 
-Uma simples API no modelo pay-as-you-go onde os usuários pagam pelo volume de chamadas realizadas.
+Uma simples API no modelo pay-as-you-go onde os clientes pagam pelo volume de chamadas realizadas.
 
 ![tour.gif](./tour.gif)
 
@@ -8,7 +8,7 @@ Uma simples API no modelo pay-as-you-go onde os usuários pagam pelo volume de c
 
 - Laravel
 - [Laravel Cashier](https://laravel.com/docs/8.x/billing)
-- [Stripe](https://stripe.com/br/billing)
+- [Stripe metered billing](https://stripe.com/docs/products-prices/pricing-models#usage-based-pricing)
 
 ## Run Locally
 
