@@ -4,9 +4,9 @@
 
         <div class="d-flex align-items-center gap-3">
             @auth
-                {{-- @if (!Route::is('dashboard') && Auth::user()->subscribed())
+                @if (!Route::is('dashboard') && Auth::user()->subscribed())
                     <a href="{{ route('dashboard') }}" class="btn btn-secondary btn-sm">Dashboard</a>
-                @endif --}}
+                @endif
 
                 <span>{{ Auth::user()->name }}</span>
 

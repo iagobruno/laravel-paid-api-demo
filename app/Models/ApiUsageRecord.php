@@ -32,6 +32,16 @@ class ApiUsageRecord extends Model
         'ends_at' => 'datetime',
     ];
 
+    public static function getCurrentBillingPeriodUsage()
+    {
+        /** @var \App\Models\User */
+        $user = auth()->user();
+        return $user->apiUsageRecords()
+            ->where('starts_at', '<=', now())
+            ->where('ends_at', '>=', now())
+            ->first();
+    }
+
     /**
      * Records an API usage in the database for monthly quota limit checking.
      * @return ApiUsageRecord API usage record in this month.
@@ -40,10 +50,7 @@ class ApiUsageRecord extends Model
     {
         /** @var \App\Models\User */
         $user = auth()->user();
-        $recordOfThisMonth = $user->apiUsageRecords()
-            ->where('starts_at', '<=', now())
-            ->where('ends_at', '>=', now())
-            ->first();
+        $recordOfThisMonth = ApiUsageRecord::getCurrentBillingPeriodUsage();
 
         if ($recordOfThisMonth) {
             $recordOfThisMonth->increment('total', $quantity);
@@ -58,6 +65,11 @@ class ApiUsageRecord extends Model
         }
 
         return $recordOfThisMonth;
+    }
+
+    public static function getUsedQuota()
+    {
+        return ApiUsageRecord::getCurrentBillingPeriodUsage()?->total ?? 0;
     }
 
     /**

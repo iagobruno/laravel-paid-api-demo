@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\LogoutController;
 use App\Http\Controllers\SubscriptionController;
@@ -27,3 +28,6 @@ Route::post('/logout', LogoutController::class)->middleware('auth')->name('logou
 Route::middleware('auth')->group(function () {
     Route::get('/subscribe', [SubscriptionController::class, 'show'])->name('subscribe.show');
     Route::post('/subscribe', [SubscriptionController::class, 'handle'])->name('subscribe.handle');
+
+    Route::get('/dashboard', [DashboardController::class, 'show'])->name('dashboard');
+});
