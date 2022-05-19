@@ -30,4 +30,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/subscribe', [SubscriptionController::class, 'handle'])->name('subscribe.handle');
 
     Route::get('/dashboard', [DashboardController::class, 'show'])->name('dashboard');
+    Route::get('/dashboard/new-token', [DashboardController::class, 'showCreateTokenForm'])->name('new-token.form');
+    Route::post('/dashboard/new-token', [DashboardController::class, 'createToken'])->name('new-token');
 });

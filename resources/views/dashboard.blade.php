@@ -5,6 +5,52 @@
 @section('content')
     <div class="m-auto" style="max-width: 700px">
         <section class="current-subscription py-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h4 class="m-0">Chaves de acesso</h4>
+                    <p class="text-muted m-0" style="font-size:0.9em">Tokens que você gerou para acessar a API.</p>
+                </div>
+                <form action="{{ route('new-token.form') }}" method="get">
+                    <button type="submit" class="btn btn-primary btn-sm">Criar novo token</button>
+                </form>
+            </div>
+
+            @if (session('newToken'))
+                <div class="alert alert-info px-3 py-2" style="font-size:0.9em">
+                    Seu novo token:
+                    <div>
+                        <input type="text" readonly value="{{ session('newToken') }}" class="border-0 bg-transparent"
+                            style="width: min(356px, 100%);" id="new-token-el">
+                        <button data-clipboard-target="#new-token-el"
+                            class="btn btn-sm btn-outline-secondary">Copiar</button>
+                    </div>
+                    <hr style="margin: 0.6em 0">
+                    <p class="mb-0">Certifique-se de copiar seu token de acesso agora. Você não será capaz
+                        de vê-lo novamente!</p>
+                </div>
+            @endif
+
+            <ul class="list-group">
+                @foreach ($tokens as $token)
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            {{ $token->name }}
+                            <span class="text-muted" style="font-size:0.8em">• Criado em
+                                {{ $token->created_at->format('d/m/Y') }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center gap-2">
+                            @if ($token->last_used_at)
+                                <span class="text-muted" style="font-size:0.8em">Usado
+                                    {{ $token->last_used_at?->diffForHumans() }}</span>
+                            @endif
+                            <span class="btn btn-sm btn-danger">Revoke</span>
+                        </div>
+                    </li>
+                @endforeach
+            </ul>
+        </section>
+
+        <section class="current-subscription py-3">
             <h4 class="mb-3">Plano atual</h4>
 
             <div class="card">
@@ -15,7 +61,7 @@
                     <div>
                         {{-- <form action="{{ route('subscribe.show') }}" method="POST"> --}}
                         {{-- @csrf --}}
-                        <button type="submit" class="btn btn-outline">Mudar plano</button>
+                        <button type="submit" class="btn btn-success">Mudar plano</button>
                         {{-- </form> --}}
                     </div>
                 </div>
@@ -76,3 +122,10 @@
         </section>
     </div>
 @endsection
+
+@push('extra_body')
+    <script src="https://unpkg.com/clipboard@2.0.11/dist/clipboard.min.js"></script>
+    <script>
+        new ClipboardJS('[data-clipboard-target]');
+    </script>
+@endpush

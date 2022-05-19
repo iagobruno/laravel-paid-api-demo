@@ -12,6 +12,7 @@ class DashboardController extends Controller
     {
         /** @var \App\Models\User */
         $user = Auth::user();
+        $tokens = $user->tokens()->latest()->get();
         $currentSubscription = $user->subscription('default');
         $upcomingInvoice = $user->upcomingInvoice();
         $invoices = $user->invoices();
@@ -25,10 +26,30 @@ class DashboardController extends Controller
             'currentSubscription',
             'upcomingInvoice',
             'invoices',
+            'tokens',
             'totalUsage',
             'freeQuota',
             'usedQuota',
             'usedQuotaPercentage',
         ]));
+    }
+
+    public function showCreateTokenForm(Request $request)
+    {
+        return view('create-token');
+    }
+
+    public function createToken(Request $request)
+    {
+        $request->validate([
+            'token-name' => ['required', 'string', 'max:255']
+        ]);
+
+        /** @var \App\Models\User */
+        $user = Auth::user();
+        $token = $user->createToken($request->input('token-name'));
+
+        return redirect()->route('dashboard')
+            ->with('newToken', $token->plainTextToken);
     }
 }
